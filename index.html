@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Plan usadzenia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5dd83;--ink:#3a2f1e;--mut:#7b6a45;--paper:#fffdf3;--pen:#1d3f8f;--rule:#bcd6ec;--margin:#e48b8b;--desk1:#dcab6a;--desk2:#c98f4f;--deskd:#8f6230;--board:#2f4a3c;--frame:#a8773f;--chalk:#f4f1e6;--btn:#2f4a3c;--btnt:#fffdf3;--hi:#fff6c8;--line:#d9bf5f;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#2a2514;--ink:#f0e6c8;--mut:#b3a374;--paper:#3b3622;--pen:#a9c1ff;--rule:#4a4a42;--margin:#8f4c4c;--desk1:#8a6a3f;--desk2:#765732;--deskd:#4f3a1e;--board:#233a2f;--frame:#6f4e29;--btn:#d9c78a;--btnt:#2a2514;--hi:#5a512c;--line:#4a4227}}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Patrick Hand","Segoe Print","Comic Sans MS",system-ui,sans-serif;font-size:1.1rem;line-height:1.35}
+main{max-width:980px;margin:0 auto;padding:20px 16px 40px}
+h1{font-weight:400;font-size:2.3rem;margin:0 0 2px;text-decoration:underline wavy #d6483a;text-underline-offset:6px;text-decoration-thickness:2px}
+p.sub{margin:10px 0 16px;color:var(--mut)}
+.add{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.add input{flex:1 1 220px;padding:10px 12px;font:inherit;border:2px solid var(--deskd);border-radius:6px;background:var(--paper);color:var(--pen)}
+button{font:inherit;padding:9px 16px;border-radius:6px;border:2px solid var(--deskd);background:var(--paper);color:var(--ink);cursor:pointer}
+button.p{background:var(--btn);color:var(--btnt);border-color:var(--btn)}
+button:focus-visible,input:focus-visible{outline:3px solid #d6483a;outline-offset:2px}
+#pool{min-height:64px;display:flex;flex-wrap:wrap;gap:8px;padding:10px 10px 10px 46px;border:2px solid var(--line);border-left:3px double var(--margin);border-radius:4px;margin-bottom:26px;background:repeating-linear-gradient(transparent 0 27px,var(--rule) 27px 28px),var(--paper);box-shadow:0 3px 0 var(--line)}
+#pool.over{outline:3px dashed #d6483a;outline-offset:3px}
+#pool .empty{color:var(--mut);align-self:center}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:4px;background:var(--paper);color:var(--pen);border:1.5px solid #e3d6a4;box-shadow:0 1px 3px rgba(60,40,10,.3);font-size:1.15rem;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;max-width:100%}
+.chip .x{color:var(--mut);cursor:pointer;padding:0 2px}
+.board{background:var(--board);color:var(--chalk);text-align:center;padding:10px;border:9px solid var(--frame);border-radius:4px;margin:0 auto 26px;width:62%;font-size:1.6rem;letter-spacing:.06em;box-shadow:inset 0 0 18px rgba(0,0,0,.45),0 7px 0 var(--deskd);position:relative}
+.board::after{content:"";position:absolute;left:12%;bottom:-19px;width:76px;height:7px;border-radius:3px;background:var(--chalk);opacity:.85}
+.room{overflow-x:auto;padding:4px 0 14px}
+.grid{display:grid;grid-template-columns:repeat(6,minmax(76px,1fr)) 30px repeat(2,minmax(76px,1fr));gap:14px 8px;min-width:660px}
+.seat{height:60px;border-radius:5px;background:linear-gradient(var(--desk1),var(--desk2));border:2px solid var(--deskd);box-shadow:0 6px 0 var(--deskd);display:flex;align-items:center;justify-content:center;padding:4px}
+.seat.over{outline:3px solid #fff;background:var(--hi)}
+.seat .chip{padding:4px 6px;font-size:1rem;width:100%;justify-content:center;overflow:hidden}
+.seat .chip span.n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ghost{position:fixed;z-index:50;pointer-events:none;transform:translate(-50%,-60%) rotate(-4deg);box-shadow:0 8px 18px rgba(0,0,0,.35)}
+.tools{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+@media print{.add,#pool,.tools,p.sub{display:none}body{background:#fff;color:#000}.seat{background:#fff;box-shadow:none;border:1px solid #000}.board{box-shadow:none}.chip{background:#fff;color:#000;border:none;box-shadow:none}}
+</style>
+</head>
+<body>
+<main>
+<h1>Plan usadzenia</h1>
+<p class="sub">Dodaj imiona, potem przeciągnij je na ławki. Zmiany zapisują się same.</p>
+<div class="add">
+<input id="inp" placeholder="Imię (kilka naraz: oddziel przecinkami)" aria-label="Imię dziecka">
+<button class="p" id="addb">Dodaj</button>
+</div>
+<div id="pool" aria-label="Dzieci bez miejsca"></div>
+<div class="board">Tablica</div>
+<div class="room"><div class="grid" id="grid"></div></div>
+<div class="tools">
+<button id="clr">Zdejmij wszystkich z ławek</button>
+<button id="prt">Drukuj</button>
+</div>
+</main>
+<script>
+(function(){
+var KEY="lawki-v1",ROWS=[8,8,8,2];
+var S={kids:[],seats:{}};
+try{var raw=localStorage.getItem(KEY);if(raw){var p=JSON.parse(raw);if(p&&p.kids)S=p}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+var pool=document.getElementById("pool"),grid=document.getElementById("grid"),inp=document.getElementById("inp");
+function kid(id){for(var i=0;i<S.kids.length;i++)if(S.kids[i].id===id)return S.kids[i];return null}
+function chip(k){
+var c=document.createElement("div");c.className="chip";c.dataset.id=k.id;
+var n=document.createElement("span");n.className="n";n.textContent=k.name;c.appendChild(n);
+var x=document.createElement("span");x.className="x";x.textContent="×";x.title="Usuń";x.setAttribute("aria-label","Usuń "+k.name);
+x.addEventListener("pointerdown",function(e){e.stopPropagation()});
+x.addEventListener("click",function(e){e.stopPropagation();remove(k.id)});
+c.appendChild(x);return c}
+function render(){
+pool.innerHTML="";grid.innerHTML="";
+var placed={};for(var s in S.seats)placed[S.seats[s]]=1;
+var any=false;
+S.kids.forEach(function(k){if(!placed[k.id]){pool.appendChild(chip(k));any=true}});
+if(!any){var e=document.createElement("span");e.className="empty";e.textContent=S.kids.length?"Wszyscy usadzeni.":"Tu pojawią się dzieci do usadzenia.";pool.appendChild(e)}
+ROWS.forEach(function(cnt,r){
+for(var c=0;c<8;c++){
+if(c===6){grid.appendChild(document.createElement("div"));}
+var show=cnt===8||c>=6;
+if(!show){grid.appendChild(document.createElement("div"));continue}
+var id="r"+r+"c"+c,d=document.createElement("div");d.className="seat";d.dataset.seat=id;
+var kk=kid(S.seats[id]);if(kk)d.appendChild(chip(kk));
+grid.appendChild(d)}
+})}
+function add(){
+var parts=inp.value.split(/[,\n;]+/);
+parts.forEach(function(t){t=t.trim();if(t)S.kids.push({id:"k"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),name:t})});
+inp.value="";save();render();inp.focus()}
+function remove(id){
+S.kids=S.kids.filter(function(k){return k.id!==id});
+for(var s in S.seats)if(S.seats[s]===id)delete S.seats[s];
+save();render()}
+document.getElementById("addb").onclick=add;
+inp.addEventListener("keydown",function(e){if(e.key==="Enter")add()});
+document.getElementById("clr").onclick=function(){S.seats={};save();render()};
+document.getElementById("prt").onclick=function(){window.print()};
+/* drag & drop (mouse + touch) */
+var drag=null;
+document.addEventListener("pointerdown",function(e){
+var c=e.target.closest&&e.target.closest(".chip");if(!c||e.button>0)return;
+var seat=c.closest("[data-seat]");
+drag={id:c.dataset.id,from:seat?seat.dataset.seat:null,ghost:null,sx:e.clientX,sy:e.clientY,hot:null};
+});
+document.addEventListener("pointermove",function(e){
+if(!drag)return;
+if(!drag.ghost){
+if(Math.abs(e.clientX-drag.sx)+Math.abs(e.clientY-drag.sy)<6)return;
+var g=chip(kid(drag.id));g.classList.add("ghost");document.body.appendChild(g);drag.ghost=g}
+e.preventDefault();
+drag.ghost.style.left=e.clientX+"px";drag.ghost.style.top=e.clientY+"px";
+var t=document.elementFromPoint(e.clientX,e.clientY),h=t&&t.closest?(t.closest("[data-seat]")||t.closest("#pool")):null;
+if(drag.hot&&drag.hot!==h)drag.hot.classList.remove("over");
+if(h)h.classList.add("over");drag.hot=h;
+},{passive:false});
+function end(e,cancel){
+if(!drag)return;var d=drag;drag=null;
+if(d.hot)d.hot.classList.remove("over");
+if(!d.ghost)return;
+d.ghost.remove();if(cancel)return;
+var t=document.elementFromPoint(e.clientX,e.clientY);if(!t)return;
+var seat=t.closest("[data-seat]"),inPool=t.closest("#pool");
+if(seat){
+var to=seat.dataset.seat,other=S.seats[to];
+if(to===d.from)return;
+for(var s in S.seats)if(S.seats[s]===d.id)delete S.seats[s];
+if(other&&d.from)S.seats[d.from]=other;
+S.seats[to]=d.id;
+}else if(inPool){
+for(var s2 in S.seats)if(S.seats[s2]===d.id)delete S.seats[s2];
+}else return;
+save();render()}
+document.addEventListener("pointerup",function(e){end(e,false)});
+document.addEventListener("pointercancel",function(e){end(e,true)});
+render();
+})();
+</script>
+</body>
+</html>
